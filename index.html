@@ -2,204 +2,260 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>3 en Raya Neon Ultra</title>
+<title>3 en Raya Neon</title>
 
+<!-- Google Font Futurista -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 body{
-  margin:0;
-  font-family:'Orbitron',sans-serif;
-  background:#050510;
-  overflow:hidden;
-  color:white;
+  background: radial-gradient(circle at top, #0f0f1a, #050510 70%);
+  font-family: 'Orbitron', sans-serif;
+  color:#fff;
+  text-align:center;
+  min-height:100vh;
+  overflow-x:hidden;
 }
 
-/* Partículas */
-#particles{
+/* Glow dinámico de fondo */
+body::before{
+  content:"";
   position:fixed;
   width:100%;
   height:100%;
+  top:0;
+  left:0;
+  background: radial-gradient(circle at 20% 30%, #00f7ff22, transparent 40%),
+              radial-gradient(circle at 80% 70%, #ff00c822, transparent 40%);
+  animation: bgMove 8s infinite alternate ease-in-out;
   z-index:-1;
 }
 
-/* Título */
+@keyframes bgMove{
+  0%{transform:translateY(0px);}
+  100%{transform:translateY(-20px);}
+}
+
 .neon-title{
-  margin-top:25px;
   font-size:2.5rem;
+  margin-top:30px;
   color:#00f7ff;
-  text-shadow:0 0 10px #00f7ff,0 0 30px #00f7ff;
+  text-shadow:
+    0 0 5px #00f7ff,
+    0 0 10px #00f7ff,
+    0 0 20px #00f7ff;
+  animation:flicker 3s infinite alternate;
 }
 
-/* Card */
+@keyframes flicker{
+  0%{opacity:1;}
+  100%{opacity:0.85;}
+}
+
 .card-neon{
-  background:rgba(15,15,30,0.85);
-  border-radius:20px;
-  padding:25px;
-  box-shadow:0 0 40px #00f7ff33;
-  border:1px solid #00f7ff55;
+  background: rgba(20,20,40,0.8);
+  backdrop-filter: blur(12px);
+  border:1px solid #00f7ff88;
+  border-radius:15px;
+  padding:20px;
+  box-shadow:
+    0 0 25px #00f7ff33,
+    inset 0 0 15px #00f7ff22;
+  transition:0.4s ease;
 }
 
-/* Board */
+.card-neon:hover{
+  box-shadow:
+    0 0 35px #00f7ff66,
+    inset 0 0 25px #00f7ff33;
+}
+
+input{
+  background:#111122 !important;
+  border:1px solid #00f7ff !important;
+  color:#fff !important;
+}
+
+input:focus{
+  box-shadow:0 0 15px #00f7ff;
+  transform:scale(1.02);
+}
+
+.btn-neon{
+  background: linear-gradient(45deg,#00f7ff,#00c3cc);
+  border:none;
+  color:#000;
+  font-weight:bold;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  box-shadow:0 0 15px #00f7ff55;
+}
+
+.btn-neon:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 25px #00f7ff;
+}
+
+.btn-danger{
+  box-shadow:0 0 10px #ff0055;
+}
+
 #board{
   display:grid;
-  grid-template-columns:repeat(3,140px);
-  gap:25px;
+  grid-template-columns:repeat(3,130px);
+  gap:15px;
   justify-content:center;
   margin-top:25px;
-  perspective:1200px;
 }
 
-/* Celda base */
 .cell{
-  position:relative;
-  width:140px;
-  height:140px;
-  border-radius:20px;
+  width:130px;
+  height:130px;
+  background: linear-gradient(145deg,#0a0a14,#141428);
+  border:2px solid #00f7ff;
+  border-radius:15px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:70px;
+  font-size:65px;
   cursor:pointer;
-  transform-style:preserve-3d;
-  transition:transform 0.15s ease;
-  background:linear-gradient(145deg,#0f0f1a,#151540);
+  transition: all 0.25s ease;
+  box-shadow:0 0 10px #00f7ff33 inset;
 }
 
-/* Shader Glow */
-.cell::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius:22px;
-  padding:2px;
-  background:linear-gradient(
-    45deg,
-    #00f7ff,
-    #ff00c8,
-    #00ff88,
-    #00f7ff
-  );
-  background-size:400% 400%;
-  animation:glowMove 6s linear infinite;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-  mask-composite:exclude;
-}
-
-@keyframes glowMove{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-
-/* Hover glow */
 .cell:hover{
-  transform:scale(1.08) translateZ(20px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.7);
+  transform:scale(1.08) rotateZ(1deg);
+  box-shadow:0 0 20px #00f7ff;
 }
 
-/* Letras */
 .X{
   color:#00f7ff;
-  text-shadow:0 0 20px #00f7ff;
+  text-shadow:0 0 15px #00f7ff;
+  animation:pop 0.2s ease;
 }
 
 .O{
   color:#ff00c8;
-  text-shadow:0 0 20px #ff00c8;
+  text-shadow:0 0 15px #ff00c8;
+  animation:pop 0.2s ease;
 }
 
-/* Ganador */
+@keyframes pop{
+  0%{transform:scale(0);}
+  100%{transform:scale(1);}
+}
+
 .winner{
-  animation:winnerPulse 1s infinite alternate;
+  animation:winnerGlow 1s infinite alternate;
 }
 
-@keyframes winnerPulse{
-  from{box-shadow:0 0 20px #00ff88;}
-  to{box-shadow:0 0 50px #00ff88;}
-}
-
-/* Popup victoria */
-.win-screen{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0);
-  font-size:3rem;
-  color:#00ff88;
-  text-shadow:0 0 30px #00ff88;
-  animation:popup 0.6s forwards;
-  z-index:10;
-}
-
-@keyframes popup{
-  to{transform:translate(-50%,-50%) scale(1);}
+@keyframes winnerGlow{
+  0%{box-shadow:0 0 20px #00ff88;}
+  100%{box-shadow:0 0 40px #00ff88;}
 }
 
 #score{
+  font-size:1.2rem;
   margin-top:15px;
-  text-shadow:0 0 15px #00f7ff;
+  text-shadow:0 0 10px #00f7ff;
+}
+
+#status{
+  margin-top:10px;
+  font-size:1rem;
+  color:#ccc;
+}
+
+/* Responsive */
+@media (max-width:768px){
+  #board{
+    grid-template-columns:repeat(3,90px);
+    gap:10px;
+  }
+  .cell{
+    width:90px;
+    height:90px;
+    font-size:45px;
+  }
+  .neon-title{
+    font-size:1.8rem;
+  }
+}
+
+/* Transiciones suaves globales */
+*{
+  transition: all 0.2s ease-in-out;
 }
 </style>
 </head>
-
 <body>
 
-<canvas id="particles"></canvas>
-
-<div class="container text-center">
-  <h1 class="neon-title">3 EN RAYA ULTRA</h1>
+<div class="container">
+  <h1 class="neon-title">3 EN RAYA NEON</h1>
 
   <div class="card-neon mt-4">
-    <div id="score"></div>
+    <div class="row g-3">
+      <div class="col-md-5">
+        <input id="nameX" class="form-control" placeholder="Nombre Jugador X">
+      </div>
+      <div class="col-md-5">
+        <input id="nameO" class="form-control" placeholder="Nombre Jugador O">
+      </div>
+      <div class="col-md-2">
+        <button onclick="saveNames()" class="btn btn-neon w-100">Guardar</button>
+      </div>
+    </div>
+
+    <div id="score" class="mt-3"></div>
     <div id="status"></div>
     <div id="board"></div>
 
     <div class="mt-4">
-      <button onclick="resetGame()" class="btn btn-info">Reiniciar</button>
+      <button onclick="resetGame()" class="btn btn-neon me-2">Reiniciar Partida</button>
+      <button onclick="resetScore()" class="btn btn-danger">Reiniciar Marcador</button>
     </div>
   </div>
 </div>
-
-<!-- Sonidos -->
-<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
-
-<script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
-  authDomain:"en-raya-a5af4.firebaseapp.com",
-  databaseURL:"https://en-raya-a5af4-default-rtdb.firebaseio.com",
-  projectId:"en-raya-a5af4",
-  storageBucket:"en-raya-a5af4.firebasestorage.app",
-  messagingSenderId:"678489143176",
-  appId:"1:678489143176:web:f1d1101fc44fefe70e6c3d"
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  databaseURL: "TU_DATABASE_URL",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-const gameRef=ref(db,"game");
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const gameRef = ref(db,"game");
 
 const board=document.getElementById("board");
 const statusText=document.getElementById("status");
 const scoreDiv=document.getElementById("score");
-const clickSound=document.getElementById("clickSound");
-const winSound=document.getElementById("winSound");
 
 let gameState=Array(9).fill("");
 let currentPlayer="X";
+let playerNames={X:"Jugador X",O:"Jugador O"};
 let score={X:0,O:0};
 
 const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+window.saveNames=function(){
+  playerNames={
+    X:document.getElementById("nameX").value||"Jugador X",
+    O:document.getElementById("nameO").value||"Jugador O"
+  };
+  updateFirebase();
+}
 
 function createBoard(){
   board.innerHTML="";
@@ -215,7 +271,6 @@ function createBoard(){
 
 function handleClick(i){
   if(gameState[i]!="") return;
-  clickSound.play();
   gameState[i]=currentPlayer;
   if(checkWinner()) return;
   currentPlayer=currentPlayer==="X"?"O":"X";
@@ -228,11 +283,15 @@ function checkWinner(){
     if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
       score[gameState[a]]++;
       highlight(combo);
-      showWin(gameState[a]);
-      winSound.play();
+      statusText.textContent="🏆 "+playerNames[gameState[a]]+" gana!";
       updateFirebase();
       return true;
     }
+  }
+  if(!gameState.includes("")){
+    statusText.textContent="Empate!";
+    updateFirebase();
+    return true;
   }
   return false;
 }
@@ -242,22 +301,19 @@ function highlight(combo){
   combo.forEach(i=>cells[i].classList.add("winner"));
 }
 
-function showWin(player){
-  const div=document.createElement("div");
-  div.classList.add("win-screen");
-  div.innerText="🏆 JUGADOR "+player+" GANA!";
-  document.body.appendChild(div);
-  setTimeout(()=>div.remove(),2000);
-}
-
-function resetGame(){
+window.resetGame=function(){
   gameState=Array(9).fill("");
   currentPlayer="X";
   updateFirebase();
 }
 
+window.resetScore=function(){
+  score={X:0,O:0};
+  updateFirebase();
+}
+
 function updateFirebase(){
-  set(gameRef,{gameState,currentPlayer,score});
+  set(gameRef,{gameState,currentPlayer,playerNames,score});
 }
 
 onValue(gameRef,(snapshot)=>{
@@ -265,27 +321,18 @@ onValue(gameRef,(snapshot)=>{
   if(data){
     gameState=data.gameState||gameState;
     currentPlayer=data.currentPlayer||currentPlayer;
+    playerNames=data.playerNames||playerNames;
     score=data.score||score;
   }
   createBoard();
-  scoreDiv.textContent="X("+score.X+") VS O("+score.O+")";
-  statusText.textContent="Turno de "+currentPlayer;
+  scoreDiv.textContent=
+    playerNames.X+" ("+score.X+")  VS  "+playerNames.O+" ("+score.O+")";
+  statusText.textContent="Turno de "+playerNames[currentPlayer];
 });
 
 createBoard();
 </script>
 
-<script>
-tsParticles.load("particles",{
-  particles:{
-    number:{value:70},
-    color:{value:["#00f7ff","#ff00c8","#00ff88"]},
-    move:{enable:true,speed:1},
-    size:{value:3},
-    opacity:{value:0.7}
-  }
-});
-</script>
-
 </body>
 </html>
+
