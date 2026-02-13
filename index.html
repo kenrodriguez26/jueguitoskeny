@@ -2,74 +2,122 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Arcade - 3 en Raya Online</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<title>3 en Raya Online</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: 'Orbitron', sans-serif;
-    overflow: hidden;
-    background: #000;
-    color: white;
+body{
+  background:#0f0f1a;
+  color:white;
+  font-family:Arial,Helvetica,sans-serif;
+  text-align:center;
 }
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
+
+h1{
+  margin-top:20px;
 }
-h1 {
-    font-weight: 700;
-    color: #0ff;
-    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #00f;
+
+#players{
+  margin:20px;
 }
-.board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    gap: 15px;
+
+input{
+  padding:8px;
+  border-radius:5px;
+  border:none;
+  margin:5px;
 }
-.cell {
-    width: 100px;
-    height: 100px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2.5rem;
-    cursor: pointer;
-    border: 2px solid #0ff;
+
+button{
+  padding:10px 15px;
+  margin:10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.2s;
 }
-.X { color: #0ff; }
-.O { color: #f0f; }
-.status {
-    font-size: 1.3rem;
-    margin: 15px 0;
+
+button:hover{
+  transform:scale(1.05);
+}
+
+#board{
+  display:grid;
+  grid-template-columns:repeat(3,120px);
+  gap:10px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.cell{
+  width:120px;
+  height:120px;
+  background:#1a1a2e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:60px;
+  cursor:pointer;
+  border-radius:10px;
+  transition:0.2s;
+}
+
+.cell:hover{
+  background:#222244;
+}
+
+.X{
+  color:#00f7ff;
+  animation:pop 0.2s ease;
+}
+
+.O{
+  color:#ff00c8;
+  animation:pop 0.2s ease;
+}
+
+@keyframes pop{
+  0%{transform:scale(0);}
+  100%{transform:scale(1);}
+}
+
+.winner{
+  animation:flash 0.6s infinite alternate;
+}
+
+@keyframes flash{
+  from{background:#00ff88;}
+  to{background:#004422;}
+}
+
+#score{
+  margin-top:20px;
+  font-size:20px;
 }
 </style>
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+<h1>3 en Raya Online</h1>
 
-<div class="container text-center mt-4">
-<h1>NEON 3 EN RAYA ONLINE</h1>
-<div class="status" id="status">Conectando...</div>
-<div class="d-flex justify-content-center">
-<div class="board" id="board"></div>
+<div id="players">
+  <input id="nameX" placeholder="Nombre Jugador X">
+  <input id="nameO" placeholder="Nombre Jugador O">
+  <button onclick="saveNames()">Guardar Nombres</button>
 </div>
-</div>
+
+<div id="score"></div>
+<div id="status">Conectando...</div>
+
+<div id="board"></div>
+
+<button onclick="resetGame()">Reiniciar Partida</button>
+<button onclick="resetScore()">Reiniciar Marcador</button>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* 🔥 TU CONFIG YA INTEGRADA */
 const firebaseConfig = {
   apiKey: "AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
   authDomain: "en-raya-a5af4.firebaseapp.com",
@@ -77,75 +125,112 @@ const firebaseConfig = {
   projectId: "en-raya-a5af4",
   storageBucket: "en-raya-a5af4.firebasestorage.app",
   messagingSenderId: "678489143176",
-  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d",
-  measurementId: "G-P1ZGVDVCKY"
+  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const boardRef = ref(db, "neonGame");
+const gameRef = ref(db, "game");
 
 const board = document.getElementById("board");
 const statusText = document.getElementById("status");
+const scoreDiv = document.getElementById("score");
 
-let playerSymbol = Math.random() > 0.5 ? "X" : "O";
-let currentPlayer = "X";
 let gameState = Array(9).fill("");
+let currentPlayer = "X";
+let playerNames = {X:"Jugador X", O:"Jugador O"};
+let score = {X:0, O:0};
 
 const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
+window.saveNames = function(){
+  const nameX=document.getElementById("nameX").value || "Jugador X";
+  const nameO=document.getElementById("nameO").value || "Jugador O";
+  playerNames={X:nameX,O:nameO};
+  updateFirebase();
+}
+
 function createBoard(){
-    board.innerHTML="";
-    gameState.forEach((cell,i)=>{
-        const div=document.createElement("div");
-        div.classList.add("cell");
-        div.textContent=cell;
-        if(cell) div.classList.add(cell);
-        div.onclick=()=>handleClick(i);
-        board.appendChild(div);
-    });
+  board.innerHTML="";
+  gameState.forEach((cell,i)=>{
+    const div=document.createElement("div");
+    div.classList.add("cell");
+    div.textContent=cell;
+    if(cell) div.classList.add(cell);
+    div.onclick=()=>handleClick(i);
+    board.appendChild(div);
+  });
 }
 
 function handleClick(i){
-    if(gameState[i] || currentPlayer!==playerSymbol) return;
-    gameState[i]=playerSymbol;
-    currentPlayer = playerSymbol==="X"?"O":"X";
-    updateGame();
-}
+  if(gameState[i] !== "") return;
 
-function updateGame(){
-    set(boardRef,{
-        gameState,
-        currentPlayer
-    });
+  gameState[i]=currentPlayer;
+  if(checkWinner()) return;
+
+  currentPlayer=currentPlayer==="X"?"O":"X";
+  updateFirebase();
 }
 
 function checkWinner(){
-    for(let combo of wins){
-        const [a,b,c]=combo;
-        if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
-            statusText.textContent="¡Jugador "+gameState[a]+" gana!";
-            return;
-        }
+  for(let combo of wins){
+    const [a,b,c]=combo;
+    if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
+      score[gameState[a]]++;
+      highlight(combo);
+      statusText.textContent="¡"+playerNames[gameState[a]]+" gana!";
+      updateFirebase();
+      return true;
     }
-    if(!gameState.includes("")){
-        statusText.textContent="¡Empate!";
-    }
+  }
+  if(!gameState.includes("")){
+    statusText.textContent="¡Empate!";
+    updateFirebase();
+    return true;
+  }
+  return false;
 }
 
-onValue(boardRef,(snapshot)=>{
-    const data=snapshot.val();
-    if(data){
-        gameState=data.gameState;
-        currentPlayer=data.currentPlayer;
-        createBoard();
-        checkWinner();
-        statusText.textContent="Turno de "+currentPlayer;
-    }
+function highlight(combo){
+  const cells=document.querySelectorAll(".cell");
+  combo.forEach(i=>cells[i].classList.add("winner"));
+}
+
+window.resetGame=function(){
+  gameState=Array(9).fill("");
+  currentPlayer="X";
+  updateFirebase();
+}
+
+window.resetScore=function(){
+  score={X:0,O:0};
+  updateFirebase();
+}
+
+function updateFirebase(){
+  set(gameRef,{
+    gameState,
+    currentPlayer,
+    playerNames,
+    score
+  });
+}
+
+onValue(gameRef,(snapshot)=>{
+  const data=snapshot.val();
+  if(data){
+    gameState=data.gameState||Array(9).fill("");
+    currentPlayer=data.currentPlayer||"X";
+    playerNames=data.playerNames||playerNames;
+    score=data.score||score;
+  }
+  createBoard();
+  statusText.textContent="Turno de "+playerNames[currentPlayer];
+  scoreDiv.textContent=
+    playerNames.X+" ("+score.X+")  vs  "+playerNames.O+" ("+score.O+")";
 });
 
 createBoard();
-
 </script>
 
 </body>
