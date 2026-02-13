@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <title>3 en Raya Neon</title>
 
-<!-- Google Font Futurista -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
@@ -17,60 +14,98 @@ body{
   color:#fff;
   text-align:center;
   min-height:100vh;
-  overflow-x:hidden;
+  margin:0;
+  overflow:hidden;
 }
 
-/* Glow dinámico de fondo */
-body::before{
-  content:"";
+/* CANVAS FONDO */
+#particles{
   position:fixed;
-  width:100%;
-  height:100%;
   top:0;
   left:0;
-  background: radial-gradient(circle at 20% 30%, #00f7ff22, transparent 40%),
-              radial-gradient(circle at 80% 70%, #ff00c822, transparent 40%);
-  animation: bgMove 8s infinite alternate ease-in-out;
+  width:100%;
+  height:100%;
   z-index:-1;
 }
 
-@keyframes bgMove{
-  0%{transform:translateY(0px);}
-  100%{transform:translateY(-20px);}
+/* 3D EFFECT */
+#board{
+  display:grid;
+  grid-template-columns:repeat(3,130px);
+  gap:15px;
+  justify-content:center;
+  margin-top:25px;
+  perspective:1000px;
+  transform-style:preserve-3d;
+  animation: boardFloat 6s infinite ease-in-out;
+}
+
+@keyframes boardFloat{
+  0%{transform: rotateX(5deg) rotateY(-5deg);}
+  50%{transform: rotateX(-5deg) rotateY(5deg);}
+  100%{transform: rotateX(5deg) rotateY(-5deg);}
+}
+
+.cell{
+  width:130px;
+  height:130px;
+  background:#0f0f1a;
+  border:2px solid #00f7ff;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:65px;
+  cursor:pointer;
+  transition:0.4s;
+  box-shadow:0 0 15px #00f7ff55 inset;
+  transform-style:preserve-3d;
+}
+
+.cell:hover{
+  transform:translateZ(20px) scale(1.08);
+  box-shadow:0 0 25px #00f7ff;
+}
+
+.X{
+  color:#00f7ff;
+  text-shadow:0 0 20px #00f7ff;
+  animation:pop3d 0.3s ease;
+}
+
+.O{
+  color:#ff00c8;
+  text-shadow:0 0 20px #ff00c8;
+  animation:pop3d 0.3s ease;
+}
+
+@keyframes pop3d{
+  0%{transform:scale(0) rotateY(180deg);}
+  100%{transform:scale(1) rotateY(0deg);}
+}
+
+.winner{
+  animation:glowWin 1s infinite alternate;
+}
+
+@keyframes glowWin{
+  from{box-shadow:0 0 20px #00ff88;}
+  to{box-shadow:0 0 40px #00ff88;}
 }
 
 .neon-title{
   font-size:2.5rem;
   margin-top:30px;
   color:#00f7ff;
-  text-shadow:
-    0 0 5px #00f7ff,
-    0 0 10px #00f7ff,
-    0 0 20px #00f7ff;
-  animation:flicker 3s infinite alternate;
-}
-
-@keyframes flicker{
-  0%{opacity:1;}
-  100%{opacity:0.85;}
+  text-shadow:0 0 20px #00f7ff;
 }
 
 .card-neon{
-  background: rgba(20,20,40,0.8);
-  backdrop-filter: blur(12px);
-  border:1px solid #00f7ff88;
+  background: rgba(20,20,40,0.85);
+  border:1px solid #00f7ff;
   border-radius:15px;
+  box-shadow:0 0 20px #00f7ff55;
   padding:20px;
-  box-shadow:
-    0 0 25px #00f7ff33,
-    inset 0 0 15px #00f7ff22;
-  transition:0.4s ease;
-}
-
-.card-neon:hover{
-  box-shadow:
-    0 0 35px #00f7ff66,
-    inset 0 0 25px #00f7ff33;
 }
 
 input{
@@ -79,82 +114,21 @@ input{
   color:#fff !important;
 }
 
-input:focus{
-  box-shadow:0 0 15px #00f7ff;
-  transform:scale(1.02);
-}
-
 .btn-neon{
-  background: linear-gradient(45deg,#00f7ff,#00c3cc);
+  background:#00f7ff;
   border:none;
   color:#000;
   font-weight:bold;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  box-shadow:0 0 15px #00f7ff55;
+  transition:0.3s;
 }
 
 .btn-neon:hover{
-  transform:translateY(-2px);
-  box-shadow:0 0 25px #00f7ff;
+  background:#00c3cc;
+  box-shadow:0 0 20px #00f7ff;
 }
 
 .btn-danger{
   box-shadow:0 0 10px #ff0055;
-}
-
-#board{
-  display:grid;
-  grid-template-columns:repeat(3,130px);
-  gap:15px;
-  justify-content:center;
-  margin-top:25px;
-}
-
-.cell{
-  width:130px;
-  height:130px;
-  background: linear-gradient(145deg,#0a0a14,#141428);
-  border:2px solid #00f7ff;
-  border-radius:15px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:65px;
-  cursor:pointer;
-  transition: all 0.25s ease;
-  box-shadow:0 0 10px #00f7ff33 inset;
-}
-
-.cell:hover{
-  transform:scale(1.08) rotateZ(1deg);
-  box-shadow:0 0 20px #00f7ff;
-}
-
-.X{
-  color:#00f7ff;
-  text-shadow:0 0 15px #00f7ff;
-  animation:pop 0.2s ease;
-}
-
-.O{
-  color:#ff00c8;
-  text-shadow:0 0 15px #ff00c8;
-  animation:pop 0.2s ease;
-}
-
-@keyframes pop{
-  0%{transform:scale(0);}
-  100%{transform:scale(1);}
-}
-
-.winner{
-  animation:winnerGlow 1s infinite alternate;
-}
-
-@keyframes winnerGlow{
-  0%{box-shadow:0 0 20px #00ff88;}
-  100%{box-shadow:0 0 40px #00ff88;}
 }
 
 #score{
@@ -168,36 +142,17 @@ input:focus{
   font-size:1rem;
   color:#ccc;
 }
-
-/* Responsive */
-@media (max-width:768px){
-  #board{
-    grid-template-columns:repeat(3,90px);
-    gap:10px;
-  }
-  .cell{
-    width:90px;
-    height:90px;
-    font-size:45px;
-  }
-  .neon-title{
-    font-size:1.8rem;
-  }
-}
-
-/* Transiciones suaves globales */
-*{
-  transition: all 0.2s ease-in-out;
-}
 </style>
 </head>
 <body>
+
+<canvas id="particles"></canvas>
 
 <div class="container">
   <h1 class="neon-title">3 EN RAYA NEON</h1>
 
   <div class="card-neon mt-4">
-    <div class="row g-3">
+    <div class="row">
       <div class="col-md-5">
         <input id="nameX" class="form-control" placeholder="Nombre Jugador X">
       </div>
@@ -221,17 +176,67 @@ input:focus{
 </div>
 
 <script type="module">
+/* ================= PARTICULAS ================= */
+
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+
+class Particle{
+  constructor(x,y,color){
+    this.x=x;
+    this.y=y;
+    this.size=Math.random()*4+1;
+    this.speedX=Math.random()*3-1.5;
+    this.speedY=Math.random()*3-1.5;
+    this.color=color;
+  }
+  update(){
+    this.x+=this.speedX;
+    this.y+=this.speedY;
+    this.size*=0.96;
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particlesArray.forEach((p,i)=>{
+    p.update();
+    p.draw();
+    if(p.size<0.5) particlesArray.splice(i,1);
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+function explode(x,y,color){
+  for(let i=0;i<40;i++){
+    particlesArray.push(new Particle(x,y,color));
+  }
+}
+
+/* ================= FIREBASE ================= */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  databaseURL: "TU_DATABASE_URL",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
+  authDomain: "en-raya-a5af4.firebaseapp.com",
+  databaseURL: "https://en-raya-a5af4-default-rtdb.firebaseio.com",
+  projectId: "en-raya-a5af4",
+  storageBucket: "en-raya-a5af4.firebasestorage.app",
+  messagingSenderId: "678489143176",
+  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -264,14 +269,18 @@ function createBoard(){
     div.classList.add("cell");
     div.textContent=cell;
     if(cell) div.classList.add(cell);
-    div.onclick=()=>handleClick(i);
+    div.onclick=()=>handleClick(i,div);
     board.appendChild(div);
   });
 }
 
-function handleClick(i){
+function handleClick(i,element){
   if(gameState[i]!="") return;
   gameState[i]=currentPlayer;
+
+  const rect = element.getBoundingClientRect();
+  explode(rect.left+65, rect.top+65, currentPlayer==="X"?"#00f7ff":"#ff00c8");
+
   if(checkWinner()) return;
   currentPlayer=currentPlayer==="X"?"O":"X";
   updateFirebase();
@@ -283,6 +292,10 @@ function checkWinner(){
     if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
       score[gameState[a]]++;
       highlight(combo);
+
+      // EXPLOSIÓN GRANDE
+      explode(window.innerWidth/2, window.innerHeight/2, "#00ff88");
+
       statusText.textContent="🏆 "+playerNames[gameState[a]]+" gana!";
       updateFirebase();
       return true;
