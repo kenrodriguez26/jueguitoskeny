@@ -3,29 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ahorcado Neon Multiplayer</title>
+<title>Ahorcado 3D Multiplayer</title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Fuente futurista -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+
 body{
     background: radial-gradient(circle at center,#0f0f1f,#000);
     color:#0ff;
     font-family:'Orbitron',sans-serif;
     text-align:center;
+    perspective:1000px;
 }
-.neon-box{
+
+/* 3D Card */
+.card-3d{
     background:rgba(0,0,0,0.7);
     border:2px solid #0ff;
     box-shadow:0 0 25px #0ff;
     border-radius:20px;
     padding:30px;
     margin-top:30px;
+    transition:0.4s;
+    transform-style:preserve-3d;
 }
+
+.card-3d:hover{
+    transform:rotateY(5deg) rotateX(5deg) scale(1.03);
+    box-shadow:0 0 40px #0ff;
+}
+
 .neon-btn{
     background:#111;
     border:1px solid #0ff;
@@ -33,65 +42,88 @@ body{
     box-shadow:0 0 10px #0ff;
     transition:0.3s;
 }
+
 .neon-btn:hover{
-    transform:scale(1.1);
-    box-shadow:0 0 25px #0ff;
+    transform:scale(1.2) rotateX(10deg);
+    box-shadow:0 0 30px #0ff;
 }
+
 #wordDisplay{
     font-size:2rem;
-    letter-spacing:10px;
+    letter-spacing:12px;
 }
-#hangman{
-    font-size:2rem;
-    margin:20px;
+
+#chatBox{
+    height:200px;
+    overflow-y:auto;
+    background:#000;
+    border:1px solid #0ff;
+    padding:10px;
 }
-.win-animation{
+
+.chat-message{
+    font-size:0.9rem;
+    text-align:left;
+    margin-bottom:5px;
+}
+
+.win{
     animation: glow 1s infinite alternate;
 }
+
 @keyframes glow{
     from{ text-shadow:0 0 10px #0ff; }
-    to{ text-shadow:0 0 30px #0ff; }
+    to{ text-shadow:0 0 40px #0ff; }
 }
+
 </style>
 </head>
 <body>
 
 <div class="container">
 
-<h1 class="mt-4">🔥 AHORCADO NEON MULTIPLAYER 🔥</h1>
+<h1 class="mt-4">🔥 AHORCADO 3D MULTIPLAYER 🔥</h1>
 
-<div id="setup" class="neon-box">
-<input type="text" id="playerName" class="form-control mb-3" placeholder="Tu Nombre">
-<input type="text" id="secretWord" class="form-control mb-3" placeholder="Palabra Secreta">
-<button class="btn neon-btn" onclick="startGame()">INICIAR JUEGO GLOBAL</button>
+<!-- REGISTRO -->
+<div class="card-3d">
+<input type="text" id="playerName" class="form-control mb-2" placeholder="Tu Nombre">
+<button class="btn neon-btn" onclick="registerPlayer()">Registrarse</button>
+<button class="btn neon-btn" onclick="startGame()">Iniciar Partida</button>
+<button class="btn neon-btn" onclick="resetGame()">Reiniciar</button>
 </div>
 
-<div id="game" class="neon-box" style="display:none;">
+<!-- COLOCAR PALABRA -->
+<div class="card-3d">
+<input type="text" id="secretWord" class="form-control mb-2" placeholder="Palabra Secreta (turno actual)">
+<button class="btn neon-btn" onclick="setWord()">Confirmar Palabra</button>
+</div>
+
+<!-- JUEGO -->
+<div class="card-3d">
 <div id="timer">Tiempo: 60</div>
-<div id="hangman"></div>
+<div id="turnInfo"></div>
 <div id="wordDisplay"></div>
 <div id="letters" class="mt-3"></div>
-<h3 id="result" class="mt-3"></h3>
+<h3 id="result"></h3>
 </div>
 
-<div class="neon-box">
-<h3>🏆 Ranking Global</h3>
-<ul id="scoreList" class="list-group"></ul>
+<!-- CHAT -->
+<div class="card-3d">
+<h4>💬 Chat en Vivo</h4>
+<div id="chatBox"></div>
+<input type="text" id="chatInput" class="form-control mt-2" placeholder="Escribe mensaje">
+<button class="btn neon-btn mt-2" onclick="sendMessage()">Enviar</button>
 </div>
 
 </div>
 
-<!-- FIREBASE + GAME SCRIPT -->
 <script type="module">
-
-/* ================= IMPORTS ================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* ================= CONFIG ================= */
-
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
   authDomain: "en-raya-a5af4.firebaseapp.com",
@@ -103,158 +135,156 @@ const firebaseConfig = {
   measurementId: "G-P1ZGVDVCKY"
 };
 
-/* ================= INIT ================= */
+const app=initializeApp(firebaseConfig);
+getAnalytics(app);
+const db=getDatabase(app);
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getDatabase(app);
+const gameRef=ref(db,"ahorcado_game");
+const chatRef=ref(db,"ahorcado_chat");
 
-const gameRef = ref(db,"ahorcado_game");
-const scoreRef = ref(db,"ahorcado_scores");
-
-let player="";
+let localPlayer="";
 let timerInterval=null;
 
-/* ================= INICIAR GLOBAL ================= */
+/* REGISTRO */
+window.registerPlayer=async()=>{
+  localPlayer=document.getElementById("playerName").value;
+  if(!localPlayer) return alert("Ingresa nombre");
+  alert("Registrado ✔");
+}
 
-window.startGame=function(){
-
-  player=document.getElementById("playerName").value;
-  const secret=document.getElementById("secretWord").value.toUpperCase();
-
-  if(!player || !secret) return alert("Completa los campos");
-
+/* INICIAR */
+window.startGame=async()=>{
   set(gameRef,{
+    active:false,
+    turn:localPlayer,
+    secretWord:"",
+    display:"",
+    timeLeft:60
+  });
+  alert("Turno de "+localPlayer);
+}
+
+/* COLOCAR PALABRA */
+window.setWord=async()=>{
+  const word=document.getElementById("secretWord").value.toUpperCase();
+  update(gameRef,{
     active:true,
-    secretWord:secret,
-    display:"_".repeat(secret.length),
-    attempts:0,
-    timeLeft:60,
-    startedBy:player
+    secretWord:word,
+    display:"_".repeat(word.length),
+    timeLeft:60
   });
 }
 
-/* ================= ESCUCHAR ================= */
-
-onValue(gameRef,(snapshot)=>{
-  const data=snapshot.val();
-  if(!data) return;
-
-  if(data.active){
-
-    document.getElementById("setup").style.display="none";
-    document.getElementById("game").style.display="block";
-
-    document.getElementById("wordDisplay").textContent=
-      data.display.split("").join(" ");
-
-    document.getElementById("hangman").textContent=
-      ["","O","O|","O/|","O/|\\","O/|\\ /","O/|\\ / \\"][data.attempts];
-
-    document.getElementById("timer").textContent="Tiempo: "+data.timeLeft;
-
-    if(!timerInterval){
-      timerInterval=setInterval(()=>{
-        update(gameRef,{
-          timeLeft:data.timeLeft-1
-        });
-      },1000);
-    }
-
-    if(data.timeLeft<=0){
-      endGame(false,data.secretWord);
-    }
-
-    if(data.display===data.secretWord){
-      endGame(true,data.secretWord);
-    }
-
-  }
-});
-
-/* ================= LETRAS ================= */
-
+/* LETRAS */
 const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const lettersDiv=document.getElementById("letters");
-
 letters.split("").forEach(l=>{
   const btn=document.createElement("button");
-  btn.className="btn neon-btn";
+  btn.className="btn neon-btn m-1";
   btn.textContent=l;
   btn.onclick=()=>guess(l);
-  lettersDiv.appendChild(btn);
+  document.getElementById("letters").appendChild(btn);
 });
 
-/* ================= ADIVINAR ================= */
-
-window.guess=function(letter){
-
-  onValue(gameRef,(snapshot)=>{
-    const data=snapshot.val();
-    if(!data.active) return;
-
-    let newDisplay=data.display;
-    let newAttempts=data.attempts;
-
-    if(data.secretWord.includes(letter)){
-      let updated="";
-      for(let i=0;i<data.secretWord.length;i++){
-        updated+=data.secretWord[i]===letter?letter:data.display[i];
-      }
-      newDisplay=updated;
-    }else{
-      newAttempts++;
+/* TIMER */
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval=setInterval(async()=>{
+    const snap=await get(gameRef);
+    let time=snap.val().timeLeft;
+    if(time<=0){
+      loseGame();
+      return;
     }
-
-    update(gameRef,{
-      display:newDisplay,
-      attempts:newAttempts
-    });
-
-  },{onlyOnce:true});
+    update(gameRef,{timeLeft:time-1});
+  },1000);
 }
 
-/* ================= FINAL ================= */
+/* ESCUCHAR */
+onValue(gameRef,(snap)=>{
+  if(!snap.exists()) return;
+  const data=snap.val();
 
-function endGame(win,secret){
+  document.getElementById("timer").textContent="Tiempo: "+data.timeLeft;
+  document.getElementById("turnInfo").textContent="Turno: "+data.turn;
 
+  if(data.active){
+    document.getElementById("wordDisplay").textContent=data.display.split("").join(" ");
+    if(!timerInterval) startTimer();
+    if(data.display===data.secretWord){
+      winGame();
+    }
+  } else {
+    clearInterval(timerInterval);
+  }
+});
+
+/* ADIVINAR */
+window.guess=async(letter)=>{
+  const snap=await get(gameRef);
+  const data=snap.val();
+  if(!data.active) return;
+
+  let newDisplay=data.display;
+
+  if(data.secretWord.includes(letter)){
+    let updated="";
+    for(let i=0;i<data.secretWord.length;i++){
+      updated+=data.secretWord[i]===letter?letter:data.display[i];
+    }
+    newDisplay=updated;
+  }
+
+  update(gameRef,{display:newDisplay});
+}
+
+/* GANAR */
+function winGame(){
   clearInterval(timerInterval);
-  timerInterval=null;
-
-  if(win){
-    document.getElementById("result").textContent="🎉 GANARON 🎉";
-    document.getElementById("result").classList.add("win-animation");
-    saveScore(player,20);
-  }else{
-    document.getElementById("result").textContent="💀 Tiempo agotado - "+secret;
-  }
-
-  update(gameRef,{active:false});
+  document.getElementById("result").textContent="🎉 GANASTE 🎉";
+  document.getElementById("result").classList.add("win");
+  setTimeout(()=>resetGame(),3000);
 }
 
-/* ================= PUNTOS ================= */
-
-function saveScore(name,points){
-  const newScore=push(scoreRef);
-  set(newScore,{name,points});
+/* PERDER */
+function loseGame(){
+  clearInterval(timerInterval);
+  alert("⏰ Tiempo agotado");
+  resetGame();
 }
 
-onValue(scoreRef,(snapshot)=>{
-  const data=snapshot.val();
-  const list=document.getElementById("scoreList");
-  list.innerHTML="";
-  if(data){
-    const scores=Object.values(data).sort((a,b)=>b.points-a.points);
-    scores.forEach(s=>{
-      const li=document.createElement("li");
-      li.className="list-group-item bg-dark text-info";
-      li.textContent=s.name+" - "+s.points+" pts";
-      list.appendChild(li);
-    });
-  }
+/* RESET */
+window.resetGame=()=>{
+  set(gameRef,{
+    active:false,
+    turn:"",
+    secretWord:"",
+    display:"",
+    timeLeft:60
+  });
+}
+
+/* CHAT */
+window.sendMessage=()=>{
+  const msg=document.getElementById("chatInput").value;
+  if(!msg) return;
+  push(chatRef,{name:localPlayer,message:msg});
+  document.getElementById("chatInput").value="";
+}
+
+onValue(chatRef,(snap)=>{
+  const box=document.getElementById("chatBox");
+  box.innerHTML="";
+  snap.forEach(child=>{
+    const data=child.val();
+    const div=document.createElement("div");
+    div.className="chat-message";
+    div.textContent=data.name+": "+data.message;
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
 });
 
 </script>
-
 </body>
 </html>
+
