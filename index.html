@@ -2,128 +2,233 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ahorcado 3D Multiplayer</title>
+<title>3 en Raya Neon</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-
 body{
-    background: radial-gradient(circle at center,#0f0f1f,#000);
-    color:#0ff;
-    font-family:'Orbitron',sans-serif;
-    text-align:center;
-    perspective:1000px;
+  background: radial-gradient(circle at top, #0f0f1a, #050510 70%);
+  font-family: 'Orbitron', sans-serif;
+  color:#fff;
+  text-align:center;
+  min-height:100vh;
+  margin:0;
+  overflow:hidden;
 }
 
-/* 3D Card */
-.card-3d{
-    background:rgba(0,0,0,0.7);
-    border:2px solid #0ff;
-    box-shadow:0 0 25px #0ff;
-    border-radius:20px;
-    padding:30px;
-    margin-top:30px;
-    transition:0.4s;
-    transform-style:preserve-3d;
+/* CANVAS FONDO */
+#particles{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-1;
 }
 
-.card-3d:hover{
-    transform:rotateY(5deg) rotateX(5deg) scale(1.03);
-    box-shadow:0 0 40px #0ff;
+/* 3D EFFECT */
+#board{
+  display:grid;
+  grid-template-columns:repeat(3,130px);
+  gap:15px;
+  justify-content:center;
+  margin-top:25px;
+  perspective:1000px;
+  transform-style:preserve-3d;
+  animation: boardFloat 6s infinite ease-in-out;
 }
 
-.neon-btn{
-    background:#111;
-    border:1px solid #0ff;
-    color:#0ff;
-    box-shadow:0 0 10px #0ff;
-    transition:0.3s;
+@keyframes boardFloat{
+  0%{transform: rotateX(5deg) rotateY(-5deg);}
+  50%{transform: rotateX(-5deg) rotateY(5deg);}
+  100%{transform: rotateX(5deg) rotateY(-5deg);}
 }
 
-.neon-btn:hover{
-    transform:scale(1.2) rotateX(10deg);
-    box-shadow:0 0 30px #0ff;
+.cell{
+  width:130px;
+  height:130px;
+  background:#0f0f1a;
+  border:2px solid #00f7ff;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:65px;
+  cursor:pointer;
+  transition:0.4s;
+  box-shadow:0 0 15px #00f7ff55 inset;
+  transform-style:preserve-3d;
 }
 
-#wordDisplay{
-    font-size:2rem;
-    letter-spacing:12px;
+.cell:hover{
+  transform:translateZ(20px) scale(1.08);
+  box-shadow:0 0 25px #00f7ff;
 }
 
-#chatBox{
-    height:200px;
-    overflow-y:auto;
-    background:#000;
-    border:1px solid #0ff;
-    padding:10px;
+.X{
+  color:#00f7ff;
+  text-shadow:0 0 20px #00f7ff;
+  animation:pop3d 0.3s ease;
 }
 
-.chat-message{
-    font-size:0.9rem;
-    text-align:left;
-    margin-bottom:5px;
+.O{
+  color:#ff00c8;
+  text-shadow:0 0 20px #ff00c8;
+  animation:pop3d 0.3s ease;
 }
 
-.win{
-    animation: glow 1s infinite alternate;
+@keyframes pop3d{
+  0%{transform:scale(0) rotateY(180deg);}
+  100%{transform:scale(1) rotateY(0deg);}
 }
 
-@keyframes glow{
-    from{ text-shadow:0 0 10px #0ff; }
-    to{ text-shadow:0 0 40px #0ff; }
+.winner{
+  animation:glowWin 1s infinite alternate;
 }
 
+@keyframes glowWin{
+  from{box-shadow:0 0 20px #00ff88;}
+  to{box-shadow:0 0 40px #00ff88;}
+}
+
+.neon-title{
+  font-size:2.5rem;
+  margin-top:30px;
+  color:#00f7ff;
+  text-shadow:0 0 20px #00f7ff;
+}
+
+.card-neon{
+  background: rgba(20,20,40,0.85);
+  border:1px solid #00f7ff;
+  border-radius:15px;
+  box-shadow:0 0 20px #00f7ff55;
+  padding:20px;
+}
+
+input{
+  background:#111122 !important;
+  border:1px solid #00f7ff !important;
+  color:#fff !important;
+}
+
+.btn-neon{
+  background:#00f7ff;
+  border:none;
+  color:#000;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+.btn-neon:hover{
+  background:#00c3cc;
+  box-shadow:0 0 20px #00f7ff;
+}
+
+.btn-danger{
+  box-shadow:0 0 10px #ff0055;
+}
+
+#score{
+  font-size:1.2rem;
+  margin-top:15px;
+  text-shadow:0 0 10px #00f7ff;
+}
+
+#status{
+  margin-top:10px;
+  font-size:1rem;
+  color:#ccc;
+}
 </style>
 </head>
 <body>
 
+<canvas id="particles"></canvas>
+
 <div class="container">
+  <h1 class="neon-title">3 EN RAYA NEON</h1>
 
-<h1 class="mt-4">🔥 AHORCADO 3D MULTIPLAYER 🔥</h1>
+  <div class="card-neon mt-4">
+    <div class="row">
+      <div class="col-md-5">
+        <input id="nameX" class="form-control" placeholder="Nombre Jugador X">
+      </div>
+      <div class="col-md-5">
+        <input id="nameO" class="form-control" placeholder="Nombre Jugador O">
+      </div>
+      <div class="col-md-2">
+        <button onclick="saveNames()" class="btn btn-neon w-100">Guardar</button>
+      </div>
+    </div>
 
-<!-- REGISTRO -->
-<div class="card-3d">
-<input type="text" id="playerName" class="form-control mb-2" placeholder="Tu Nombre">
-<button class="btn neon-btn" onclick="registerPlayer()">Registrarse</button>
-<button class="btn neon-btn" onclick="startGame()">Iniciar Partida</button>
-<button class="btn neon-btn" onclick="resetGame()">Reiniciar</button>
-</div>
+    <div id="score" class="mt-3"></div>
+    <div id="status"></div>
+    <div id="board"></div>
 
-<!-- COLOCAR PALABRA -->
-<div class="card-3d">
-<input type="text" id="secretWord" class="form-control mb-2" placeholder="Palabra Secreta (turno actual)">
-<button class="btn neon-btn" onclick="setWord()">Confirmar Palabra</button>
-</div>
-
-<!-- JUEGO -->
-<div class="card-3d">
-<div id="timer">Tiempo: 60</div>
-<div id="turnInfo"></div>
-<div id="wordDisplay"></div>
-<div id="letters" class="mt-3"></div>
-<h3 id="result"></h3>
-</div>
-
-<!-- CHAT -->
-<div class="card-3d">
-<h4>💬 Chat en Vivo</h4>
-<div id="chatBox"></div>
-<input type="text" id="chatInput" class="form-control mt-2" placeholder="Escribe mensaje">
-<button class="btn neon-btn mt-2" onclick="sendMessage()">Enviar</button>
-</div>
-
+    <div class="mt-4">
+      <button onclick="resetGame()" class="btn btn-neon me-2">Reiniciar Partida</button>
+      <button onclick="resetScore()" class="btn btn-danger">Reiniciar Marcador</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
+/* ================= PARTICULAS ================= */
+
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+
+class Particle{
+  constructor(x,y,color){
+    this.x=x;
+    this.y=y;
+    this.size=Math.random()*4+1;
+    this.speedX=Math.random()*3-1.5;
+    this.speedY=Math.random()*3-1.5;
+    this.color=color;
+  }
+  update(){
+    this.x+=this.speedX;
+    this.y+=this.speedY;
+    this.size*=0.96;
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particlesArray.forEach((p,i)=>{
+    p.update();
+    p.draw();
+    if(p.size<0.5) particlesArray.splice(i,1);
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+function explode(x,y,color){
+  for(let i=0;i<40;i++){
+    particlesArray.push(new Particle(x,y,color));
+  }
+}
+
+/* ================= FIREBASE ================= */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
   authDomain: "en-raya-a5af4.firebaseapp.com",
@@ -131,160 +236,117 @@ const firebaseConfig = {
   projectId: "en-raya-a5af4",
   storageBucket: "en-raya-a5af4.firebasestorage.app",
   messagingSenderId: "678489143176",
-  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d",
-  measurementId: "G-P1ZGVDVCKY"
+  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d"
 };
 
-const app=initializeApp(firebaseConfig);
-getAnalytics(app);
-const db=getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const gameRef = ref(db,"game");
 
-const gameRef=ref(db,"ahorcado_game");
-const chatRef=ref(db,"ahorcado_chat");
+const board=document.getElementById("board");
+const statusText=document.getElementById("status");
+const scoreDiv=document.getElementById("score");
 
-let localPlayer="";
-let timerInterval=null;
+let gameState=Array(9).fill("");
+let currentPlayer="X";
+let playerNames={X:"Jugador X",O:"Jugador O"};
+let score={X:0,O:0};
 
-/* REGISTRO */
-window.registerPlayer=async()=>{
-  localPlayer=document.getElementById("playerName").value;
-  if(!localPlayer) return alert("Ingresa nombre");
-  alert("Registrado ✔");
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+window.saveNames=function(){
+  playerNames={
+    X:document.getElementById("nameX").value||"Jugador X",
+    O:document.getElementById("nameO").value||"Jugador O"
+  };
+  updateFirebase();
 }
 
-/* INICIAR */
-window.startGame=async()=>{
-  set(gameRef,{
-    active:false,
-    turn:localPlayer,
-    secretWord:"",
-    display:"",
-    timeLeft:60
-  });
-  alert("Turno de "+localPlayer);
-}
-
-/* COLOCAR PALABRA */
-window.setWord=async()=>{
-  const word=document.getElementById("secretWord").value.toUpperCase();
-  update(gameRef,{
-    active:true,
-    secretWord:word,
-    display:"_".repeat(word.length),
-    timeLeft:60
-  });
-}
-
-/* LETRAS */
-const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-letters.split("").forEach(l=>{
-  const btn=document.createElement("button");
-  btn.className="btn neon-btn m-1";
-  btn.textContent=l;
-  btn.onclick=()=>guess(l);
-  document.getElementById("letters").appendChild(btn);
-});
-
-/* TIMER */
-function startTimer(){
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval=setInterval(async()=>{
-    const snap=await get(gameRef);
-    let time=snap.val().timeLeft;
-    if(time<=0){
-      loseGame();
-      return;
-    }
-    update(gameRef,{timeLeft:time-1});
-  },1000);
-}
-
-/* ESCUCHAR */
-onValue(gameRef,(snap)=>{
-  if(!snap.exists()) return;
-  const data=snap.val();
-
-  document.getElementById("timer").textContent="Tiempo: "+data.timeLeft;
-  document.getElementById("turnInfo").textContent="Turno: "+data.turn;
-
-  if(data.active){
-    document.getElementById("wordDisplay").textContent=data.display.split("").join(" ");
-    if(!timerInterval) startTimer();
-    if(data.display===data.secretWord){
-      winGame();
-    }
-  } else {
-    clearInterval(timerInterval);
-  }
-});
-
-/* ADIVINAR */
-window.guess=async(letter)=>{
-  const snap=await get(gameRef);
-  const data=snap.val();
-  if(!data.active) return;
-
-  let newDisplay=data.display;
-
-  if(data.secretWord.includes(letter)){
-    let updated="";
-    for(let i=0;i<data.secretWord.length;i++){
-      updated+=data.secretWord[i]===letter?letter:data.display[i];
-    }
-    newDisplay=updated;
-  }
-
-  update(gameRef,{display:newDisplay});
-}
-
-/* GANAR */
-function winGame(){
-  clearInterval(timerInterval);
-  document.getElementById("result").textContent="🎉 GANASTE 🎉";
-  document.getElementById("result").classList.add("win");
-  setTimeout(()=>resetGame(),3000);
-}
-
-/* PERDER */
-function loseGame(){
-  clearInterval(timerInterval);
-  alert("⏰ Tiempo agotado");
-  resetGame();
-}
-
-/* RESET */
-window.resetGame=()=>{
-  set(gameRef,{
-    active:false,
-    turn:"",
-    secretWord:"",
-    display:"",
-    timeLeft:60
-  });
-}
-
-/* CHAT */
-window.sendMessage=()=>{
-  const msg=document.getElementById("chatInput").value;
-  if(!msg) return;
-  push(chatRef,{name:localPlayer,message:msg});
-  document.getElementById("chatInput").value="";
-}
-
-onValue(chatRef,(snap)=>{
-  const box=document.getElementById("chatBox");
-  box.innerHTML="";
-  snap.forEach(child=>{
-    const data=child.val();
+function createBoard(){
+  board.innerHTML="";
+  gameState.forEach((cell,i)=>{
     const div=document.createElement("div");
-    div.className="chat-message";
-    div.textContent=data.name+": "+data.message;
-    box.appendChild(div);
+    div.classList.add("cell");
+    div.textContent=cell;
+    if(cell) div.classList.add(cell);
+    div.onclick=()=>handleClick(i,div);
+    board.appendChild(div);
   });
-  box.scrollTop=box.scrollHeight;
+}
+
+function handleClick(i,element){
+  if(gameState[i]!="") return;
+  gameState[i]=currentPlayer;
+
+  const rect = element.getBoundingClientRect();
+  explode(rect.left+65, rect.top+65, currentPlayer==="X"?"#00f7ff":"#ff00c8");
+
+  if(checkWinner()) return;
+  currentPlayer=currentPlayer==="X"?"O":"X";
+  updateFirebase();
+}
+
+function checkWinner(){
+  for(let combo of wins){
+    const[a,b,c]=combo;
+    if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
+      score[gameState[a]]++;
+      highlight(combo);
+
+      // EXPLOSIÓN GRANDE
+      explode(window.innerWidth/2, window.innerHeight/2, "#00ff88");
+
+      statusText.textContent="🏆 "+playerNames[gameState[a]]+" gana!";
+      updateFirebase();
+      return true;
+    }
+  }
+  if(!gameState.includes("")){
+    statusText.textContent="Empate!";
+    updateFirebase();
+    return true;
+  }
+  return false;
+}
+
+function highlight(combo){
+  const cells=document.querySelectorAll(".cell");
+  combo.forEach(i=>cells[i].classList.add("winner"));
+}
+
+window.resetGame=function(){
+  gameState=Array(9).fill("");
+  currentPlayer="X";
+  updateFirebase();
+}
+
+window.resetScore=function(){
+  score={X:0,O:0};
+  updateFirebase();
+}
+
+function updateFirebase(){
+  set(gameRef,{gameState,currentPlayer,playerNames,score});
+}
+
+onValue(gameRef,(snapshot)=>{
+  const data=snapshot.val();
+  if(data){
+    gameState=data.gameState||gameState;
+    currentPlayer=data.currentPlayer||currentPlayer;
+    playerNames=data.playerNames||playerNames;
+    score=data.score||score;
+  }
+  createBoard();
+  scoreDiv.textContent=
+    playerNames.X+" ("+score.X+")  VS  "+playerNames.O+" ("+score.O+")";
+  statusText.textContent="Turno de "+playerNames[currentPlayer];
 });
 
+createBoard();
 </script>
+
 </body>
 </html>
+
 
