@@ -16,21 +16,33 @@ min-height:100vh;
 color:white;
 font-family:Arial;
 }
+
 .card-custom{
 background:rgba(255,255,255,0.06);
 border:1px solid rgba(255,255,255,0.1);
 backdrop-filter:blur(12px);
 border-radius:20px;
 }
+
 #reader{
 width:100%;
 border-radius:15px;
 overflow:hidden;
 min-height:320px;
+display:none;
 }
+
 .success{background:#16a34a;}
 .error{background:#dc2626;}
 .pending{background:#f59e0b;}
+
+#camaraBloqueada{
+padding:40px;
+text-align:center;
+border:2px dashed rgba(255,255,255,0.2);
+border-radius:15px;
+}
+
 </style>
 </head>
 
@@ -45,25 +57,32 @@ min-height:320px;
 
 <div class="row g-4">
 
+<!-- IZQUIERDA -->
 <div class="col-lg-6">
 <div class="card card-custom p-4">
 
-<h4>Cargar Excel</h4>
-<input type="file" id="excelFile" class="form-control mb-3" accept=".xlsx,.xls">
+<h4>1. Cargar Excel</h4>
+<input type="file" id="excelFile" class="form-control mb-4" accept=".xlsx,.xls">
 
-<h4 class="mt-4">Escáner QR</h4>
+<h4>2. Escáner QR</h4>
+
+<div id="camaraBloqueada">
+📁 Primero debes cargar el archivo Excel
+</div>
+
 <div id="reader"></div>
 
 </div>
 </div>
 
+<!-- DERECHA -->
 <div class="col-lg-6">
 <div class="card card-custom p-4">
 
 <h4>Resultado</h4>
 
 <div id="resultado" class="p-4 rounded pending mt-3">
-Esperando escaneo...
+Esperando archivo Excel...
 </div>
 
 <hr>
@@ -80,20 +99,68 @@ Esperando escaneo...
 <script>
 let baseDatos = [];
 let registrados = {};
-let qr = new Html5Qrcode("reader");
-let camaraActiva = false;
+let qr = null;
+let camaraIniciada = false;
 
-/* =========================
-   INICIAR CAMARA
-========================= */
-async function iniciarCamara(){
+/* ==========================
+   CARGAR EXCEL
+========================== */
+document.getElementById("excelFile").addEventListener("change", cargarExcel);
 
-if(camaraActiva) return;
+function cargarExcel(e){
+
+const file = e.target.files[0];
+if(!file) return;
+
+document.getElementById("resultado").innerHTML = "Cargando Excel...";
+
+const reader = new FileReader();
+
+reader.onload = function(evt){
 
 try{
 
-await qr.start(
-{ facingMode: { ideal:"environment" } },
+const data = new Uint8Array(evt.target.result);
+const workbook = XLSX.read(data,{type:'array'});
+const sheet = workbook.Sheets[workbook.SheetNames[0]];
+baseDatos = XLSX.utils.sheet_to_json(sheet);
+
+document.getElementById("resultado").className="p-4 rounded success mt-3";
+document.getElementById("resultado").innerHTML = `
+<h4>✅ Excel cargado</h4>
+Registros: ${baseDatos.length}
+`;
+
+habilitarCamara();
+
+}catch(error){
+
+document.getElementById("resultado").className="p-4 rounded error mt-3";
+document.getElementById("resultado").innerHTML = `
+<h4>❌ Error al leer Excel</h4>
+`;
+
+}
+
+};
+
+reader.readAsArrayBuffer(file);
+}
+
+/* ==========================
+   HABILITAR CAMARA
+========================== */
+function habilitarCamara(){
+
+if(camaraIniciada) return;
+
+document.getElementById("camaraBloqueada").style.display = "none";
+document.getElementById("reader").style.display = "block";
+
+qr = new Html5Qrcode("reader");
+
+qr.start(
+{ facingMode: { ideal: "environment" } },
 {
 fps:10,
 qrbox:250
@@ -104,78 +171,12 @@ buscarQR(decodedText);
 (error)=>{}
 );
 
-camaraActiva = true;
-
-}catch(e){
-console.log(e);
+camaraIniciada = true;
 }
 
-}
-
-/* =========================
-   REANUDAR CAMARA
-========================= */
-async function reanudarCamara(){
-
-try{
-if(qr.isPaused){
-await qr.resume();
-}
-}catch(e){
-iniciarCamara();
-}
-
-}
-
-/* =========================
-   PAUSAR CAMARA
-========================= */
-async function pausarCamara(){
-try{
-await qr.pause(true);
-}catch(e){}
-}
-
-/* =========================
-   CARGAR EXCEL SIN CONGELAR
-========================= */
-document.getElementById("excelFile").addEventListener("change", cargarExcel);
-
-async function cargarExcel(e){
-
-const file = e.target.files[0];
-if(!file) return;
-
-/* Pausar cámara mientras carga archivo */
-await pausarCamara();
-
-const reader = new FileReader();
-
-reader.onload = function(evt){
-
-setTimeout(()=>{
-
-const data = new Uint8Array(evt.target.result);
-const workbook = XLSX.read(data,{type:'array'});
-const sheet = workbook.Sheets[workbook.SheetNames[0]];
-baseDatos = XLSX.utils.sheet_to_json(sheet);
-
-alert("Excel cargado correctamente. Registros: " + baseDatos.length);
-
-/* Reactivar cámara */
-reanudarCamara();
-
-},100);
-
-};
-
-reader.readAsArrayBuffer(file);
-
-}
-
-/* =========================
+/* ==========================
    VALIDAR QR
-========================= */
+========================== */
 function buscarQR(codigo){
 
 let persona = baseDatos.find(
@@ -189,7 +190,7 @@ mostrarDuplicado(persona);
 return;
 }
 
-registrados[codigo]=true;
+registrados[codigo] = true;
 mostrarExito(persona);
 
 }else{
@@ -198,12 +199,13 @@ mostrarError(codigo);
 
 }
 
-/* =========================
+/* ==========================
    MENSAJES
-========================= */
+========================== */
 function mostrarExito(p){
-document.getElementById("resultado").className="p-4 rounded success";
-document.getElementById("resultado").innerHTML=`
+
+document.getElementById("resultado").className="p-4 rounded success mt-3";
+document.getElementById("resultado").innerHTML = `
 <h3>✅ Check-In Exitoso</h3>
 <b>${p.Nombre}</b><br>
 ${p.Empresa}<br>
@@ -219,27 +221,24 @@ ${p.Nombre} - ${p.Empresa}
 }
 
 function mostrarDuplicado(p){
-document.getElementById("resultado").className="p-4 rounded error";
-document.getElementById("resultado").innerHTML=`
+
+document.getElementById("resultado").className="p-4 rounded error mt-3";
+document.getElementById("resultado").innerHTML = `
 <h3>⚠ Ya Registrado</h3>
 <b>${p.Nombre}</b>
 `;
 }
 
 function mostrarError(codigo){
-document.getElementById("resultado").className="p-4 rounded error";
-document.getElementById("resultado").innerHTML=`
+
+document.getElementById("resultado").className="p-4 rounded error mt-3";
+document.getElementById("resultado").innerHTML = `
 <h3>❌ QR No válido</h3>
 Código: ${codigo}
 `;
 }
 
-/* INICIAR AUTOMATICAMENTE */
-iniciarCamara();
-
 </script>
 
-</body>
-</html>
 </body>
 </html>
