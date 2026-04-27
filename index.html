@@ -3,71 +3,249 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Check-In</title>
+
+<title>Check-In QR Corporativo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body{
-background:linear-gradient(135deg,#0f172a,#1e293b);
-min-height:100vh;
-color:white;
-font-family:Arial;
+:root{
+--black:#0f0f0f;
+--black-soft:#171717;
+--beige:#d8cbb8;
+--beige-soft:#f3eee8;
+--white:#ffffff;
+--gray:#bdbdbd;
+--success:#1f7a4d;
+--danger:#a02828;
 }
 
-.card-custom{
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.1);
-backdrop-filter:blur(12px);
-border-radius:20px;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Montserrat',sans-serif;
+background:linear-gradient(145deg,#0a0a0a,#141414,#1c1c1c);
+color:var(--white);
+min-height:100vh;
+}
+
+.main-wrap{
+padding:30px 15px;
+}
+
+.app-box{
+max-width:1300px;
+margin:auto;
+}
+
+.header-box{
+text-align:center;
+margin-bottom:28px;
+}
+
+.logo-space{
+width:110px;
+height:110px;
+margin:auto;
+border:2px dashed rgba(255,255,255,.15);
+border-radius:22px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:13px;
+color:var(--gray);
+margin-bottom:18px;
+background:rgba(255,255,255,.02);
+}
+
+.title{
+font-size:2rem;
+font-weight:800;
+letter-spacing:1px;
+margin-bottom:8px;
+}
+
+.subtitle{
+color:#d6d6d6;
+font-size:.95rem;
+font-weight:500;
+}
+
+.card-ui{
+background:rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.08);
+border-radius:24px;
+padding:26px;
+backdrop-filter:blur(10px);
+box-shadow:0 12px 30px rgba(0,0,0,.25);
+height:100%;
+}
+
+.section-title{
+font-size:1rem;
+font-weight:700;
+margin-bottom:14px;
+color:var(--beige);
+letter-spacing:.4px;
+}
+
+.form-control{
+background:#fff;
+border:none;
+border-radius:14px;
+padding:14px;
+font-weight:600;
+font-size:.95rem;
+}
+
+.form-control:focus{
+box-shadow:0 0 0 3px rgba(216,203,184,.25);
+border:none;
+}
+
+.btn-ui{
+border:none;
+padding:13px 20px;
+border-radius:14px;
+font-weight:700;
+font-size:.92rem;
+transition:.25s ease;
+letter-spacing:.3px;
+}
+
+.btn-export{
+background:linear-gradient(135deg,var(--beige),#f0e4d3);
+color:#111;
+}
+
+.btn-export:hover{
+transform:translateY(-2px);
+opacity:.95;
 }
 
 #reader{
 width:100%;
 min-height:320px;
-border-radius:15px;
+border-radius:18px;
 overflow:hidden;
 display:none;
 background:#000;
 }
 
-.success{background:#16a34a;}
-.error{background:#dc2626;}
-.pending{background:#f59e0b;}
-
 #bloqueado{
-padding:40px;
+padding:40px 20px;
+border:1px dashed rgba(255,255,255,.15);
+border-radius:18px;
 text-align:center;
-border:2px dashed rgba(255,255,255,0.2);
-border-radius:15px;
+color:#d2d2d2;
+background:rgba(255,255,255,.02);
+}
+
+.status-box{
+padding:20px;
+border-radius:18px;
+font-weight:600;
+line-height:1.6;
+background:#2a2a2a;
+}
+
+.success{background:var(--success);}
+.error{background:var(--danger);}
+.pending{background:#705b34;}
+
+.list-group-item{
+border:none;
+border-bottom:1px solid rgba(0,0,0,.06);
+padding:14px;
+font-weight:600;
+font-size:.92rem;
+}
+
+.list-group{
+border-radius:18px;
+overflow:hidden;
+}
+
+.small-muted{
+font-size:.85rem;
+color:#dadada;
+}
+
+@media(max-width:991px){
+.title{
+font-size:1.7rem;
+}
+.card-ui{
+padding:20px;
+}
+}
+
+@media(max-width:576px){
+.main-wrap{
+padding:20px 12px;
+}
+.logo-space{
+width:90px;
+height:90px;
+font-size:11px;
+}
+.title{
+font-size:1.45rem;
+}
+.subtitle{
+font-size:.88rem;
+}
+.btn-ui{
+width:100%;
+margin-top:10px;
+}
+.top-mobile{
+display:block !important;
+}
 }
 </style>
 </head>
 
 <body>
 
-<div class="container py-5">
+<div class="main-wrap">
+<div class="app-box">
 
-<div class="text-center mb-4">
-<h1 class="fw-bold">CHECK-IN EVENTO</h1>
-<p class="text-light">Carga Excel + Escaneo QR + Exportar Registrados</p>
+<!-- HEADER -->
+<div class="header-box">
+<div class="logo-space">
+LOGOTIPO
+</div>
+
+<div class="title">CHECK-IN EVENTO</div>
+<div class="subtitle">Sistema corporativo de acceso con QR</div>
 </div>
 
 <div class="row g-4">
 
 <!-- IZQUIERDA -->
 <div class="col-lg-6">
-<div class="card card-custom p-4">
+<div class="card-ui">
 
-<h4>1. Cargar Excel</h4>
+<div class="section-title">1. Cargar base de datos Excel</div>
+
 <input type="file" id="excelFile" class="form-control mb-4" accept=".xlsx,.xls">
 
-<h4>2. Cámara QR</h4>
+<div class="section-title">2. Escáner QR</div>
 
 <div id="bloqueado">
-📁 Carga primero el archivo Excel
+Carga primero el archivo Excel para habilitar la cámara trasera.
 </div>
 
 <div id="reader"></div>
@@ -77,29 +255,33 @@ border-radius:15px;
 
 <!-- DERECHA -->
 <div class="col-lg-6">
-<div class="card card-custom p-4">
+<div class="card-ui">
 
-<h4>Resultado</h4>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 top-mobile">
+<div class="section-title m-0">Resultado</div>
 
-<div id="resultado" class="p-4 rounded pending mt-3">
-Esperando archivo Excel...
-</div>
-
-<hr>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h5 class="mb-0">Registrados:</h5>
-
-<button class="btn btn-success btn-sm" onclick="exportarRegistrados()">
-Exportar Excel
+<button class="btn-ui btn-export" onclick="exportarRegistrados()">
+Exportar registrados
 </button>
 </div>
 
-<ul id="lista" class="list-group mt-2"></ul>
+<div id="resultado" class="status-box pending">
+Esperando archivo Excel...
+</div>
+
+<hr class="border-secondary my-4">
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+<div class="section-title m-0">Ingresados</div>
+<div class="small-muted" id="contador">0 personas</div>
+</div>
+
+<ul id="lista" class="list-group mt-3"></ul>
 
 </div>
 </div>
 
+</div>
 </div>
 </div>
 
@@ -109,9 +291,9 @@ let registrados = {};
 let listaRegistrados = [];
 let scanner = null;
 
-/* ======================
-   SUBIR EXCEL
-====================== */
+/* ===========================
+   CARGAR EXCEL
+=========================== */
 document.getElementById("excelFile").addEventListener("change", cargarExcel);
 
 function cargarExcel(e){
@@ -119,7 +301,7 @@ function cargarExcel(e){
 const file = e.target.files[0];
 if(!file) return;
 
-document.getElementById("resultado").innerHTML = "Cargando Excel...";
+setEstado("Cargando archivo Excel...", "pending");
 
 const reader = new FileReader();
 
@@ -132,21 +314,12 @@ const workbook = XLSX.read(data,{type:'array'});
 const sheet = workbook.Sheets[workbook.SheetNames[0]];
 baseDatos = XLSX.utils.sheet_to_json(sheet);
 
-document.getElementById("resultado").className="p-4 rounded success mt-3";
-document.getElementById("resultado").innerHTML = `
-<h4>✅ Excel cargado correctamente</h4>
-Registros: ${baseDatos.length}
-`;
+setEstado("✅ Excel cargado correctamente<br>Registros: " + baseDatos.length,"success");
 
 activarCamara();
 
-}catch(err){
-
-document.getElementById("resultado").className="p-4 rounded error mt-3";
-document.getElementById("resultado").innerHTML = `
-<h4>❌ Error leyendo Excel</h4>
-`;
-
+}catch(error){
+setEstado("❌ Error al leer el archivo Excel","error");
 }
 
 };
@@ -154,13 +327,13 @@ document.getElementById("resultado").innerHTML = `
 reader.readAsArrayBuffer(file);
 }
 
-/* ======================
+/* ===========================
    CAMARA TRASERA
-====================== */
+=========================== */
 function activarCamara(){
 
-document.getElementById("bloqueado").style.display = "none";
-document.getElementById("reader").style.display = "block";
+document.getElementById("bloqueado").style.display="none";
+document.getElementById("reader").style.display="block";
 
 scanner = new Html5Qrcode("reader");
 
@@ -168,33 +341,33 @@ scanner.start(
 { facingMode:"environment" },
 {
 fps:10,
-qrbox:{ width:250, height:250 }
+qrbox:{width:250,height:250}
 },
-(qrCodeMessage)=>{
-buscarQR(qrCodeMessage);
+(texto)=>{
+buscarQR(texto);
 },
-(errorMessage)=>{}
-).catch(err=>{
+(error)=>{}
+).catch(()=>{
 
 scanner.start(
-{ facingMode:{ exact:"environment" } },
+{ facingMode:{ exact:"environment"} },
 {
 fps:10,
-qrbox:{ width:250, height:250 }
+qrbox:{width:250,height:250}
 },
-(qrCodeMessage)=>{
-buscarQR(qrCodeMessage);
+(texto)=>{
+buscarQR(texto);
 },
-(errorMessage)=>{}
+(error)=>{}
 );
 
 });
 
 }
 
-/* ======================
-   VALIDAR QR
-====================== */
+/* ===========================
+   BUSCAR QR
+=========================== */
 function buscarQR(codigo){
 
 let persona = baseDatos.find(
@@ -204,13 +377,12 @@ p => String(p.QR).trim() === codigo.trim()
 if(persona){
 
 if(registrados[codigo]){
-mostrarDuplicado(persona);
+setEstado("⚠ Ya registrado<br><b>"+persona.Nombre+"</b>","error");
 return;
 }
 
 registrados[codigo] = true;
 
-/* guardar en exportación */
 listaRegistrados.push({
 Nombre: persona.Nombre || "",
 Empresa: persona.Empresa || "",
@@ -219,21 +391,34 @@ QR: codigo,
 Hora: new Date().toLocaleString()
 });
 
-mostrarExito(persona);
+setEstado(
+"✅ Check-In exitoso<br><b>"+persona.Nombre+"</b><br>"+(persona.Empresa || "")+"<br>"+(persona.Cargo || ""),
+"success"
+);
+
+document.getElementById("lista").innerHTML += `
+<li class="list-group-item">
+${persona.Nombre} - ${persona.Empresa || ""}
+</li>
+`;
+
+actualizarContador();
 
 }else{
-mostrarError(codigo);
-}
+
+setEstado("❌ QR no válido<br>Código: "+codigo,"error");
 
 }
 
-/* ======================
-   EXPORTAR EXCEL
-====================== */
+}
+
+/* ===========================
+   EXPORTAR
+=========================== */
 function exportarRegistrados(){
 
 if(listaRegistrados.length === 0){
-alert("No hay registrados para exportar.");
+alert("No hay registrados.");
 return;
 }
 
@@ -242,48 +427,24 @@ const wb = XLSX.utils.book_new();
 
 XLSX.utils.book_append_sheet(wb, ws, "Registrados");
 
-XLSX.writeFile(wb, "Registrados_Checkin.xlsx");
+XLSX.writeFile(wb,"Registrados_Checkin.xlsx");
 }
 
-/* ======================
-   MENSAJES
-====================== */
-function mostrarExito(p){
+/* ===========================
+   UI
+=========================== */
+function setEstado(html,tipo){
 
-document.getElementById("resultado").className="p-4 rounded success mt-3";
-document.getElementById("resultado").innerHTML = `
-<h3>✅ Check-In Exitoso</h3>
-<b>${p.Nombre}</b><br>
-${p.Empresa}<br>
-${p.Cargo}<br>
-Hora: ${new Date().toLocaleTimeString()}
-`;
+const box = document.getElementById("resultado");
+box.className = "status-box " + tipo;
+box.innerHTML = html;
 
-document.getElementById("lista").innerHTML += `
-<li class="list-group-item">
-${p.Nombre} - ${p.Empresa}
-</li>
-`;
 }
 
-function mostrarDuplicado(p){
-
-document.getElementById("resultado").className="p-4 rounded error mt-3";
-document.getElementById("resultado").innerHTML = `
-<h3>⚠ Ya Registrado</h3>
-<b>${p.Nombre}</b>
-`;
+function actualizarContador(){
+document.getElementById("contador").innerText =
+listaRegistrados.length + " personas";
 }
-
-function mostrarError(codigo){
-
-document.getElementById("resultado").className="p-4 rounded error mt-3";
-document.getElementById("resultado").innerHTML = `
-<h3>❌ QR No válido</h3>
-Código: ${codigo}
-`;
-}
-
 </script>
 
 </body>
