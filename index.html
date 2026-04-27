@@ -157,10 +157,9 @@ Código: ${codigo}
 
 const qr = new Html5Qrcode("reader");
 
-Html5Qrcode.getCameras().then(devices => {
-if(devices.length){
+/* USAR CÁMARA TRASERA */
 qr.start(
-devices[0].id,
+{ facingMode: { exact: "environment" } },
 {
 fps:10,
 qrbox:250
@@ -169,8 +168,21 @@ qrbox:250
 buscarQR(decodedText);
 },
 (error)=>{}
-);
-}
+).catch(err => {
+
+    /* SI NO FUNCIONA exact, prueba environment normal */
+    qr.start(
+    { facingMode: "environment" },
+    {
+    fps:10,
+    qrbox:250
+    },
+    (decodedText)=>{
+    buscarQR(decodedText);
+    },
+    (error)=>{}
+    );
+
 });
 </script>
 
