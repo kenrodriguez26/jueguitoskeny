@@ -43,7 +43,6 @@ text-align:center;
 border:2px dashed rgba(255,255,255,0.2);
 border-radius:15px;
 }
-
 </style>
 </head>
 
@@ -53,7 +52,7 @@ border-radius:15px;
 
 <div class="text-center mb-4">
 <h1 class="fw-bold">CHECK-IN EVENTO</h1>
-<p class="text-light">Sube Excel y luego escanea QR</p>
+<p class="text-light">Carga Excel + Escaneo QR + Exportar Registrados</p>
 </div>
 
 <div class="row g-4">
@@ -88,8 +87,15 @@ Esperando archivo Excel...
 
 <hr>
 
-<h5>Ingresados:</h5>
-<ul id="lista" class="list-group mt-3"></ul>
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h5 class="mb-0">Registrados:</h5>
+
+<button class="btn btn-success btn-sm" onclick="exportarRegistrados()">
+Exportar Excel
+</button>
+</div>
+
+<ul id="lista" class="list-group mt-2"></ul>
 
 </div>
 </div>
@@ -100,6 +106,7 @@ Esperando archivo Excel...
 <script>
 let baseDatos = [];
 let registrados = {};
+let listaRegistrados = [];
 let scanner = null;
 
 /* ======================
@@ -148,7 +155,7 @@ reader.readAsArrayBuffer(file);
 }
 
 /* ======================
-   ACTIVAR CAMARA TRASERA
+   CAMARA TRASERA
 ====================== */
 function activarCamara(){
 
@@ -158,7 +165,7 @@ document.getElementById("reader").style.display = "block";
 scanner = new Html5Qrcode("reader");
 
 scanner.start(
-{ facingMode: "environment" },
+{ facingMode:"environment" },
 {
 fps:10,
 qrbox:{ width:250, height:250 }
@@ -167,10 +174,10 @@ qrbox:{ width:250, height:250 }
 buscarQR(qrCodeMessage);
 },
 (errorMessage)=>{}
-).catch(err => {
+).catch(err=>{
 
 scanner.start(
-{ facingMode: { exact:"environment" } },
+{ facingMode:{ exact:"environment" } },
 {
 fps:10,
 qrbox:{ width:250, height:250 }
@@ -186,7 +193,7 @@ buscarQR(qrCodeMessage);
 }
 
 /* ======================
-   BUSCAR QR
+   VALIDAR QR
 ====================== */
 function buscarQR(codigo){
 
@@ -202,6 +209,16 @@ return;
 }
 
 registrados[codigo] = true;
+
+/* guardar en exportación */
+listaRegistrados.push({
+Nombre: persona.Nombre || "",
+Empresa: persona.Empresa || "",
+Cargo: persona.Cargo || "",
+QR: codigo,
+Hora: new Date().toLocaleString()
+});
+
 mostrarExito(persona);
 
 }else{
@@ -211,7 +228,25 @@ mostrarError(codigo);
 }
 
 /* ======================
-   RESULTADOS
+   EXPORTAR EXCEL
+====================== */
+function exportarRegistrados(){
+
+if(listaRegistrados.length === 0){
+alert("No hay registrados para exportar.");
+return;
+}
+
+const ws = XLSX.utils.json_to_sheet(listaRegistrados);
+const wb = XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(wb, ws, "Registrados");
+
+XLSX.writeFile(wb, "Registrados_Checkin.xlsx");
+}
+
+/* ======================
+   MENSAJES
 ====================== */
 function mostrarExito(p){
 
