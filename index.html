@@ -2,351 +2,177 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>3 en Raya Neon</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Check-In QR Corporativo</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 body{
-  background: radial-gradient(circle at top, #0f0f1a, #050510 70%);
-  font-family: 'Orbitron', sans-serif;
-  color:#fff;
-  text-align:center;
-  min-height:100vh;
-  margin:0;
-  overflow:hidden;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+min-height:100vh;
+color:white;
+font-family:Arial;
 }
-
-/* CANVAS FONDO */
-#particles{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:-1;
+.card-custom{
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.1);
+backdrop-filter:blur(12px);
+border-radius:20px;
 }
-
-/* 3D EFFECT */
-#board{
-  display:grid;
-  grid-template-columns:repeat(3,130px);
-  gap:15px;
-  justify-content:center;
-  margin-top:25px;
-  perspective:1000px;
-  transform-style:preserve-3d;
-  animation: boardFloat 6s infinite ease-in-out;
+#reader{
+width:100%;
+border-radius:15px;
+overflow:hidden;
 }
-
-@keyframes boardFloat{
-  0%{transform: rotateX(5deg) rotateY(-5deg);}
-  50%{transform: rotateX(-5deg) rotateY(5deg);}
-  100%{transform: rotateX(5deg) rotateY(-5deg);}
+.success{
+background:#16a34a;
 }
-
-.cell{
-  width:130px;
-  height:130px;
-  background:#0f0f1a;
-  border:2px solid #00f7ff;
-  border-radius:15px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:65px;
-  cursor:pointer;
-  transition:0.4s;
-  box-shadow:0 0 15px #00f7ff55 inset;
-  transform-style:preserve-3d;
+.error{
+background:#dc2626;
 }
-
-.cell:hover{
-  transform:translateZ(20px) scale(1.08);
-  box-shadow:0 0 25px #00f7ff;
-}
-
-.X{
-  color:#00f7ff;
-  text-shadow:0 0 20px #00f7ff;
-  animation:pop3d 0.3s ease;
-}
-
-.O{
-  color:#ff00c8;
-  text-shadow:0 0 20px #ff00c8;
-  animation:pop3d 0.3s ease;
-}
-
-@keyframes pop3d{
-  0%{transform:scale(0) rotateY(180deg);}
-  100%{transform:scale(1) rotateY(0deg);}
-}
-
-.winner{
-  animation:glowWin 1s infinite alternate;
-}
-
-@keyframes glowWin{
-  from{box-shadow:0 0 20px #00ff88;}
-  to{box-shadow:0 0 40px #00ff88;}
-}
-
-.neon-title{
-  font-size:2.5rem;
-  margin-top:30px;
-  color:#00f7ff;
-  text-shadow:0 0 20px #00f7ff;
-}
-
-.card-neon{
-  background: rgba(20,20,40,0.85);
-  border:1px solid #00f7ff;
-  border-radius:15px;
-  box-shadow:0 0 20px #00f7ff55;
-  padding:20px;
-}
-
-input{
-  background:#111122 !important;
-  border:1px solid #00f7ff !important;
-  color:#fff !important;
-}
-
-.btn-neon{
-  background:#00f7ff;
-  border:none;
-  color:#000;
-  font-weight:bold;
-  transition:0.3s;
-}
-
-.btn-neon:hover{
-  background:#00c3cc;
-  box-shadow:0 0 20px #00f7ff;
-}
-
-.btn-danger{
-  box-shadow:0 0 10px #ff0055;
-}
-
-#score{
-  font-size:1.2rem;
-  margin-top:15px;
-  text-shadow:0 0 10px #00f7ff;
-}
-
-#status{
-  margin-top:10px;
-  font-size:1rem;
-  color:#ccc;
+.pending{
+background:#f59e0b;
 }
 </style>
 </head>
+
 <body>
 
-<canvas id="particles"></canvas>
+<div class="container py-5">
 
-<div class="container">
-  <h1 class="neon-title">3 EN RAYA NEON</h1>
-
-  <div class="card-neon mt-4">
-    <div class="row">
-      <div class="col-md-5">
-        <input id="nameX" class="form-control" placeholder="Nombre Jugador X">
-      </div>
-      <div class="col-md-5">
-        <input id="nameO" class="form-control" placeholder="Nombre Jugador O">
-      </div>
-      <div class="col-md-2">
-        <button onclick="saveNames()" class="btn btn-neon w-100">Guardar</button>
-      </div>
-    </div>
-
-    <div id="score" class="mt-3"></div>
-    <div id="status"></div>
-    <div id="board"></div>
-
-    <div class="mt-4">
-      <button onclick="resetGame()" class="btn btn-neon me-2">Reiniciar Partida</button>
-      <button onclick="resetScore()" class="btn btn-danger">Reiniciar Marcador</button>
-    </div>
-  </div>
+<div class="text-center mb-4">
+<h1 class="fw-bold">CHECK-IN EVENTO</h1>
+<p class="text-light">Escaneo QR + Validación Excel</p>
 </div>
 
-<script type="module">
-/* ================= PARTICULAS ================= */
+<div class="row g-4">
 
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+<div class="col-lg-6">
+<div class="card card-custom p-4">
+<h4>Cargar Excel</h4>
+<input type="file" id="excelFile" class="form-control mb-3" accept=".xlsx,.xls">
 
-let particlesArray = [];
+<h4 class="mt-4">Escáner QR</h4>
+<div id="reader"></div>
+</div>
+</div>
 
-class Particle{
-  constructor(x,y,color){
-    this.x=x;
-    this.y=y;
-    this.size=Math.random()*4+1;
-    this.speedX=Math.random()*3-1.5;
-    this.speedY=Math.random()*3-1.5;
-    this.color=color;
-  }
-  update(){
-    this.x+=this.speedX;
-    this.y+=this.speedY;
-    this.size*=0.96;
-  }
-  draw(){
-    ctx.fillStyle=this.color;
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-    ctx.fill();
-  }
+<div class="col-lg-6">
+<div class="card card-custom p-4">
+<h4>Resultado</h4>
+
+<div id="resultado" class="p-4 rounded pending mt-3">
+Esperando escaneo...
+</div>
+
+<hr>
+
+<h5>Ingresados:</h5>
+<ul id="lista" class="list-group mt-3"></ul>
+
+</div>
+</div>
+
+</div>
+</div>
+
+<script>
+let baseDatos = [];
+let registrados = {};
+
+document.getElementById('excelFile').addEventListener('change', cargarExcel);
+
+function cargarExcel(e){
+const file = e.target.files[0];
+const reader = new FileReader();
+
+reader.onload = function(evt){
+const data = new Uint8Array(evt.target.result);
+const workbook = XLSX.read(data,{type:'array'});
+const sheet = workbook.Sheets[workbook.SheetNames[0]];
+baseDatos = XLSX.utils.sheet_to_json(sheet);
+
+alert("Excel cargado correctamente. Registros: " + baseDatos.length);
 }
 
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particlesArray.forEach((p,i)=>{
-    p.update();
-    p.draw();
-    if(p.size<0.5) particlesArray.splice(i,1);
-  });
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-function explode(x,y,color){
-  for(let i=0;i<40;i++){
-    particlesArray.push(new Particle(x,y,color));
-  }
+reader.readAsArrayBuffer(file);
 }
 
-/* ================= FIREBASE ================= */
+function buscarQR(codigo){
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+let persona = baseDatos.find(p => String(p.QR).trim() === codigo.trim());
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAd8_1E7UDpGoikvX7XeXLYvotcEiKeoJk",
-  authDomain: "en-raya-a5af4.firebaseapp.com",
-  databaseURL: "https://en-raya-a5af4-default-rtdb.firebaseio.com",
-  projectId: "en-raya-a5af4",
-  storageBucket: "en-raya-a5af4.firebasestorage.app",
-  messagingSenderId: "678489143176",
-  appId: "1:678489143176:web:f1d1101fc44fefe70e6c3d"
-};
+if(persona){
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const gameRef = ref(db,"game");
-
-const board=document.getElementById("board");
-const statusText=document.getElementById("status");
-const scoreDiv=document.getElementById("score");
-
-let gameState=Array(9).fill("");
-let currentPlayer="X";
-let playerNames={X:"Jugador X",O:"Jugador O"};
-let score={X:0,O:0};
-
-const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-
-window.saveNames=function(){
-  playerNames={
-    X:document.getElementById("nameX").value||"Jugador X",
-    O:document.getElementById("nameO").value||"Jugador O"
-  };
-  updateFirebase();
+if(registrados[codigo]){
+mostrarDuplicado(persona);
+return;
 }
 
-function createBoard(){
-  board.innerHTML="";
-  gameState.forEach((cell,i)=>{
-    const div=document.createElement("div");
-    div.classList.add("cell");
-    div.textContent=cell;
-    if(cell) div.classList.add(cell);
-    div.onclick=()=>handleClick(i,div);
-    board.appendChild(div);
-  });
+registrados[codigo]=true;
+mostrarExito(persona);
+
+}else{
+mostrarError(codigo);
 }
 
-function handleClick(i,element){
-  if(gameState[i]!="") return;
-  gameState[i]=currentPlayer;
-
-  const rect = element.getBoundingClientRect();
-  explode(rect.left+65, rect.top+65, currentPlayer==="X"?"#00f7ff":"#ff00c8");
-
-  if(checkWinner()) return;
-  currentPlayer=currentPlayer==="X"?"O":"X";
-  updateFirebase();
 }
 
-function checkWinner(){
-  for(let combo of wins){
-    const[a,b,c]=combo;
-    if(gameState[a]&&gameState[a]===gameState[b]&&gameState[a]===gameState[c]){
-      score[gameState[a]]++;
-      highlight(combo);
+function mostrarExito(p){
+document.getElementById("resultado").className="p-4 rounded success";
+document.getElementById("resultado").innerHTML=`
+<h3>✅ Check-In Exitoso</h3>
+<b>${p.Nombre}</b><br>
+${p.Empresa}<br>
+${p.Cargo}<br>
+Hora: ${new Date().toLocaleTimeString()}
+`;
 
-      // EXPLOSIÓN GRANDE
-      explode(window.innerWidth/2, window.innerHeight/2, "#00ff88");
-
-      statusText.textContent="🏆 "+playerNames[gameState[a]]+" gana!";
-      updateFirebase();
-      return true;
-    }
-  }
-  if(!gameState.includes("")){
-    statusText.textContent="Empate!";
-    updateFirebase();
-    return true;
-  }
-  return false;
+document.getElementById("lista").innerHTML += `
+<li class="list-group-item">
+${p.Nombre} - ${p.Empresa}
+</li>
+`;
 }
 
-function highlight(combo){
-  const cells=document.querySelectorAll(".cell");
-  combo.forEach(i=>cells[i].classList.add("winner"));
+function mostrarDuplicado(p){
+document.getElementById("resultado").className="p-4 rounded error";
+document.getElementById("resultado").innerHTML=`
+<h3>⚠ Ya Registrado</h3>
+<b>${p.Nombre}</b>
+`;
 }
 
-window.resetGame=function(){
-  gameState=Array(9).fill("");
-  currentPlayer="X";
-  updateFirebase();
+function mostrarError(codigo){
+document.getElementById("resultado").className="p-4 rounded error";
+document.getElementById("resultado").innerHTML=`
+<h3>❌ QR No válido</h3>
+Código: ${codigo}
+`;
 }
 
-window.resetScore=function(){
-  score={X:0,O:0};
-  updateFirebase();
-}
+const qr = new Html5Qrcode("reader");
 
-function updateFirebase(){
-  set(gameRef,{gameState,currentPlayer,playerNames,score});
+Html5Qrcode.getCameras().then(devices => {
+if(devices.length){
+qr.start(
+devices[0].id,
+{
+fps:10,
+qrbox:250
+},
+(decodedText)=>{
+buscarQR(decodedText);
+},
+(error)=>{}
+);
 }
-
-onValue(gameRef,(snapshot)=>{
-  const data=snapshot.val();
-  if(data){
-    gameState=data.gameState||gameState;
-    currentPlayer=data.currentPlayer||currentPlayer;
-    playerNames=data.playerNames||playerNames;
-    score=data.score||score;
-  }
-  createBoard();
-  scoreDiv.textContent=
-    playerNames.X+" ("+score.X+")  VS  "+playerNames.O+" ("+score.O+")";
-  statusText.textContent="Turno de "+playerNames[currentPlayer];
 });
-
-createBoard();
 </script>
 
 </body>
 </html>
-
-
